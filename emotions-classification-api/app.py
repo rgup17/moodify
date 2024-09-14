@@ -5,6 +5,18 @@ import pickle
 import nltk
 from nltk.stem import PorterStemmer
 from nltk.corpus import stopwords
+from dotenv import load_dotenv
+import os
+import flask
+from flask import request, jsonify
+
+app = flask.Flask(__name__)
+
+# load_dotenv()
+
+# client_id = os.getenv("SPOTIFY_CLIENT_ID")
+# client_secret = os.getenv("SPOTIFY_CLIENT_SECRET")
+
 
 
 # Download the NLTK resources
@@ -35,17 +47,37 @@ def predict_emotion(input_text):
     # Predict emotion
     predicted_label = lg.predict(input_vectorized)[0]
     predicted_emotion = lb.inverse_transform([predicted_label])[0]
-    label =  np.max(lg.predict(input_vectorized))
+    label =  int(np.max(lg.predict(input_vectorized)))
 
     return predicted_emotion,label
 
-# app
-st.title("Moodify")
-st.write("This app predicts the emotion based on the text you input. The emotions are: 'joy', 'sadness', 'fear', 'anger', 'love', 'surprise'.")
-st.write("Based on the predicted emotion, you can listen to a song that matches your mood.")
-input_text = st.text_area("Write down your thoughts here")
 
-if st.button("Predict how you are feeling"):
-  predicted_emotion, label = predict_emotion(input_text)
-  st.write("The emotion predicted is:", predicted_emotion)
-  st.write("The probability is:", label)  
+@app.route('/predict', methods=['POST'])
+def predict():
+   data = request.get_json(force=True)
+   text = data.get('text', '')
+
+   if not text:
+       return jsonify({'error': 'no text provided'}), 400
+   
+   emotion, label = predict_emotion(text)
+
+   return jsonify({
+      'emotion': emotion,
+      'label': label
+   })
+
+if __name__ == '__main__':
+    app.run(debug=True)
+
+# app
+# st.set_page_config(page_title='Moodify', page_icon=':notes:')
+# st.title("Moodify")
+# st.write("This app predicts the emotion based on the text you input. The emotions are: 'joy', 'sadness', 'fear', 'anger', 'love', 'surprise'.")
+# st.write("Based on the predicted emotion, you can listen to a song that matches your mood.")
+# input_text = st.text_area("Write down your thoughts here")
+
+# if st.button("Predict how you are feeling"):
+#   predicted_emotion, label = predict_emotion(input_text)
+#   st.write("The emotion predicted is:", predicted_emotion)
+#   st.write("The probability is:", label)  
