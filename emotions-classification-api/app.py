@@ -42,7 +42,7 @@ def predict_emotion(input_text):
 # app
 st.title("Moodify")
 st.write("This app predicts the emotion based on the text you input. The emotions are: 'joy', 'sadness', 'fear', 'anger', 'love', 'surprise'.")
-
+st.write("Based on the predicted emotion, you can listen to a song that matches your mood.")
 input_text = st.text_area("Write down your thoughts here")
 
 if st.button("Predict how you are feeling"):
